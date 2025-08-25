@@ -2075,8 +2075,15 @@ public class InvoiceService implements IInvoiceService {
                 SupportDTO supportDTO = new SupportDTO();
 
                 if (scanListDTO.getType().equals("active_list") || scanListDTO.getType().equals("paused_list")) {
+
+                    String checkedType = scanListDTO.getType();
+                    if (scanListDTO.getType().equals("paused_list")){
+                        checkedType = "paused_list_exist_notification";
+                    }
+
+
                     ResponseEntity<List<AdsAccountDTO>> responseTmp = restTemplate.exchange(
-                            itgreenToolServer + "/api-ads-account/list?list_type=" + scanListDTO.getType(),
+                            itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType,
                             HttpMethod.GET,
                             null,
                             new ParameterizedTypeReference<List<AdsAccountDTO>>() {
