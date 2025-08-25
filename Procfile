@@ -1,0 +1,1 @@
+web: java -jar target/simple_official_spring_template-1.0-SNAPSHOT.jar
