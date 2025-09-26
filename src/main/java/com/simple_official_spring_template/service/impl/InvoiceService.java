@@ -731,7 +731,7 @@ public class InvoiceService implements IInvoiceService {
 //    @Async
 
 
-    @Scheduled(initialDelay = 0, fixedDelay = 5 * 60 * 1000)
+    @Scheduled(initialDelay = 0, fixedDelay = 20 * 60 * 1000)
     public void deleteRecommendAds() {
 
 //        java -jar hoa_don-1.0-SNAPSHOT.jar --dinhvb.automode=only_check_list
@@ -2401,15 +2401,25 @@ public class InvoiceService implements IInvoiceService {
 //
             // Quét link tự động
 
-            driver.get("https://quanlyads.com/can-theo-doi/theo-doi-10-phut?check=1");
             try {
+                Thread.sleep(1000);
+                driver.get("https://quanlyads.com/can-theo-doi/theo-doi-10-phut?check=1");
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".noi_dung")));
             } catch (Exception ignore) {
             }
 
 
-            driver.get("https://quanlyads.com/can-theo-doi/theoi-doi-30-phut?check=1");
+
             try {
+                Thread.sleep(1000);
+                driver.get("https://quanlyads.com/can-theo-doi/theoi-doi-30-phut?check=1");
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".noi_dung")));
+            } catch (Exception ignore) {
+            }
+
+            try {
+                Thread.sleep(1000);
+                driver.get("https://quanlyads.com/danh-sach-acc-khoa");
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".noi_dung")));
             } catch (Exception ignore) {
             }
