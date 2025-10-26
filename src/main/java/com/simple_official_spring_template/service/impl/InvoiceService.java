@@ -2078,7 +2078,7 @@ public class InvoiceService implements IInvoiceService {
 
                     String checkedType = scanListDTO.getType();
                     if (scanListDTO.getType().equals("paused_list")){
-                        checkedType = "paused_list_exist_notification";
+                        checkedType = "paused_list_excluding_ids";
                     }
 
 
