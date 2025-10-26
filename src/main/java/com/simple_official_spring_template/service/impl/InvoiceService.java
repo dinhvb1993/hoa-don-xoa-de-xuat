@@ -731,7 +731,7 @@ public class InvoiceService implements IInvoiceService {
 //    @Async
 
 
-    @Scheduled(initialDelay = 0, fixedDelay = 20 * 60 * 1000)
+    @Scheduled(initialDelay = 0, fixedDelay = 8 * 60 * 1000)
     public void deleteRecommendAds() {
 
 //        java -jar hoa_don-1.0-SNAPSHOT.jar --dinhvb.automode=only_check_list
