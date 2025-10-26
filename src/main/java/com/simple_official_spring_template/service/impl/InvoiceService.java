@@ -2420,7 +2420,8 @@ public class InvoiceService implements IInvoiceService {
             try {
                 Thread.sleep(1000);
                 driver.get("https://quanlyads.com/danh-sach-acc-khoa");
-                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".noi_dung")));
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".system_title")));
+                Thread.sleep(15000);
             } catch (Exception ignore) {
             }
 
