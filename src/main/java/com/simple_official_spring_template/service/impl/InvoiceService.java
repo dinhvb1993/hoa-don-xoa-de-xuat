@@ -1098,7 +1098,7 @@ public class InvoiceService implements IInvoiceService {
 
 
             //                     Chỉ lọc các tài khoản chưa có profile payment
-            if (true) {
+            if (false) {
                 if (hasNewRows) {
                     ResponseEntity<List<AdsAccountDTO>> responseTmpMain = restTemplate.exchange(
                             itgreenToolServer + "/api-ads-account/payments-profile-not-null",
@@ -2090,12 +2090,45 @@ public class InvoiceService implements IInvoiceService {
 
                 if (scanListDTO.getType().equals("active_list") || scanListDTO.getType().equals("paused_list")) {
 
+
+
+
+
                     String checkedType = scanListDTO.getType();
+                    String linkCall  = itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType;
+
+
                     if (scanListDTO.getType().equals("paused_list")){
                         checkedType = "paused_list_excluding_ids";
+
+
+
+                        ResponseEntity<List<Long>> responseTmp = restTemplate.exchange(
+                                "https://quanlyads.com/khang-json-data?flag_ngo=1",
+                                HttpMethod.GET,
+                                null,
+                                new ParameterizedTypeReference<List<Long>>() {
+                                }
+                        );
+
+                        List<Long> newIds = responseTmp.getBody();
+
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < newIds.size(); i++) {
+                            sb.append(newIds.get(i));
+                            if (i < newIds.size() - 1) {
+                                sb.append(",");
+                            }
+                        }
+                        String idsStr = sb.toString();
+
+                        linkCall  = itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType + "&ids_str=" + idsStr;
+
                     }
 
 //                    System.out.println(itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType);
+
+                    System.out.println(linkCall);
 
 
                     ResponseEntity<List<AdsAccountDTO>> responseTmp = null;
@@ -2106,7 +2139,7 @@ public class InvoiceService implements IInvoiceService {
                     while (callApiCounter < 2){
                         try {
                             responseTmp = restTemplate.exchange(
-                                    itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType,
+                                    linkCall,
                                     HttpMethod.GET,
                                     null,
                                     new ParameterizedTypeReference<List<AdsAccountDTO>>() {
