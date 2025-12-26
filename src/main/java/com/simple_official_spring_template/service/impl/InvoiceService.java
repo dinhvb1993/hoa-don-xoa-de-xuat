@@ -2128,7 +2128,7 @@ public class InvoiceService implements IInvoiceService {
 
 //                    System.out.println(itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType);
 
-                    System.out.println(linkCall);
+//                    System.out.println(linkCall);
 
 
                     ResponseEntity<List<AdsAccountDTO>> responseTmp = null;
