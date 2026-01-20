@@ -2352,6 +2352,9 @@ public class InvoiceService implements IInvoiceService {
                                     System.out.println("Checking customer id: " + formatCustomerId);
 
 
+
+
+
                                     // Cap nhat thong bao, ly do bi ngung
 
                                     try {
@@ -2403,6 +2406,41 @@ public class InvoiceService implements IInvoiceService {
 //                                                                }
 
 
+
+                                            // Cập nhật ocid, __c
+
+                                            boolean isUpdateAccount = false;
+
+                                            String accountCellHref = mtAccountCellLink.getAttribute("href");
+
+                                            Map<String, List<String>> queryParams = getQueryParams(accountCellHref);
+
+
+                                            if (currentAdsAccountDTO.getOcid() == null) {
+                                                if (queryParams.get("ocid") != null) {
+                                                    newAdsAccountDTO.setOcid(getQueryParams(accountCellHref).get("ocid").get(0));
+                                                    isUpdateAccount = true;
+                                                }
+                                            }
+                                            if (currentAdsAccountDTO.getAscid() == null) {
+                                                if (queryParams.get("ascid") != null) {
+                                                    newAdsAccountDTO.setAscid(getQueryParams(accountCellHref).get("ascid").get(0));
+                                                    isUpdateAccount = true;
+                                                }
+                                            }
+
+
+                                            if (currentAdsAccountDTO.getC() == null) {
+                                                if (queryParams.get("__c") != null) {
+                                                    newAdsAccountDTO.setC(getQueryParams(accountCellHref).get("__c").get(0));
+                                                    isUpdateAccount = true;
+                                                }
+                                            }
+                                            // End cập nhật ocid, __c
+
+
+
+
                                             // Cập nhật notification
                                             if (currentAdsAccountDTO.getNotificationCheckingTime() == null || !currentAdsAccountDTO.getNotification().equals(accNotification)) {
 
@@ -2410,7 +2448,14 @@ public class InvoiceService implements IInvoiceService {
                                                 newAdsAccountDTO.setNotification(accNotification);
                                                 newAdsAccountDTO.setNotificationCheckingTime(new Timestamp(System.currentTimeMillis()));
 
+                                                isUpdateAccount = true;
 
+
+
+
+                                            }
+
+                                            if (isUpdateAccount) {
                                                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
                                                 HttpHeaders headers = new HttpHeaders();
@@ -2418,8 +2463,10 @@ public class InvoiceService implements IInvoiceService {
 //                param.put("id","10");
                                                 HttpEntity<AdsAccountDTO> requestEntity = new HttpEntity<AdsAccountDTO>(newAdsAccountDTO, headers);
                                                 HttpEntity<AdsAccountDTO> response = restTemplate.exchange(requestUrl2, HttpMethod.PUT, requestEntity, AdsAccountDTO.class, param);
-
                                             }
+
+
+
 
 
                                         }
