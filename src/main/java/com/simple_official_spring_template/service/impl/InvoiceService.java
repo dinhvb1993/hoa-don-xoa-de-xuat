@@ -2379,13 +2379,22 @@ public class InvoiceService implements IInvoiceService {
 
                                             newCheckedCustomerIdList.add(currentAdsAccountDTO.getId());
 
-                                            WebElement notification = mtCustomerRow.findElement(By.cssSelector("notification-type-text.notification-type-text .has-hover"));
-                                            action.moveToElement(notification);
-                                            notification.click();
+                                            String accNotification = null;
+
+
+                                            try {
+                                                WebElement notification = mtCustomerRow.findElement(By.cssSelector("notification-type-text.notification-type-text .has-hover"));
+                                                action.moveToElement(notification);
+                                                notification.click();
 
 //                                                    Thread.sleep(1000);
 //                                                    String accNotification = driver.findElement(By.cssSelector(".relative-elements-container .particle-tooltip-container .particle-tooltip")).getText();
-                                            String accNotification = fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".relative-elements-container .particle-tooltip-container .particle-tooltip"))).getText();
+                                                accNotification = fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".relative-elements-container .particle-tooltip-container .particle-tooltip"))).getText();
+                                            }
+                                            catch (Exception e){
+                                                System.out.println("Lấy notification lỗi");
+                                            }
+
 
 
                                             AdsAccountDTO newAdsAccountDTO = new AdsAccountDTO();
@@ -2442,7 +2451,7 @@ public class InvoiceService implements IInvoiceService {
 
 
                                             // Cập nhật notification
-                                            if (currentAdsAccountDTO.getNotificationCheckingTime() == null || !currentAdsAccountDTO.getNotification().equals(accNotification)) {
+                                            if (accNotification != null && (currentAdsAccountDTO.getNotificationCheckingTime() == null || !currentAdsAccountDTO.getNotification().equals(accNotification))) {
 
 
                                                 newAdsAccountDTO.setNotification(accNotification);
