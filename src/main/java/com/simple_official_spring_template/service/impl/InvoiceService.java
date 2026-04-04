@@ -2178,12 +2178,14 @@ public class InvoiceService implements IInvoiceService {
 
 //                                System.out.println(tkHoatDongLink);
 
-                        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
+
 
                         try {
                             Thread.sleep(3000);
-                        } catch (InterruptedException e) {
+                            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
+                        } catch (Exception e) {
                             e.printStackTrace();
+                            continue;
                         }
 
                         try {
