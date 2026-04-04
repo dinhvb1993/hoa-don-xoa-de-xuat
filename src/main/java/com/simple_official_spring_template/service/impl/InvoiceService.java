@@ -2178,12 +2178,14 @@ public class InvoiceService implements IInvoiceService {
 
 //                                System.out.println(tkHoatDongLink);
 
-                        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
+
 
                         try {
                             Thread.sleep(3000);
-                        } catch (InterruptedException e) {
+                            fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
+                        } catch (Exception e) {
                             e.printStackTrace();
+                            continue;
                         }
 
                         try {
@@ -2379,13 +2381,26 @@ public class InvoiceService implements IInvoiceService {
 
                                             newCheckedCustomerIdList.add(currentAdsAccountDTO.getId());
 
+
+                                            action.moveToElement(mtCustomerRow.findElement(By.cssSelector("accounts-cell")));
+                                            Thread.sleep(1000);
+
+
+
+
                                             WebElement notification = mtCustomerRow.findElement(By.cssSelector("notification-type-text.notification-type-text .has-hover"));
-                                            action.moveToElement(notification);
-                                            notification.click();
+//                                            System.out.println(notification.getText());
+
+//                                            action.moveToElement(notification);
+//                                            notification.click();
+
+                                            action.moveToElement(notification).click().build().perform();
 
 //                                                    Thread.sleep(1000);
 //                                                    String accNotification = driver.findElement(By.cssSelector(".relative-elements-container .particle-tooltip-container .particle-tooltip")).getText();
                                             String accNotification = fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".relative-elements-container .particle-tooltip-container .particle-tooltip"))).getText();
+
+                                            System.out.println("Get notification successfully");
 
 
                                             AdsAccountDTO newAdsAccountDTO = new AdsAccountDTO();
