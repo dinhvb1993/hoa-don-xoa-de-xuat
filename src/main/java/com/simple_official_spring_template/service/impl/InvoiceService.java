@@ -2098,33 +2098,34 @@ public class InvoiceService implements IInvoiceService {
                     String linkCall  = itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType;
 
 
-                    if (scanListDTO.getType().equals("paused_list")){
-                        checkedType = "paused_list_excluding_ids";
-
-
-
-                        ResponseEntity<List<Long>> responseTmp = restTemplate.exchange(
-                                "https://quanlyads.com/khang-json-data?flag_ngo=1",
-                                HttpMethod.GET,
-                                null,
-                                new ParameterizedTypeReference<List<Long>>() {
-                                }
-                        );
-
-                        List<Long> newIds = responseTmp.getBody();
-
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 0; i < newIds.size(); i++) {
-                            sb.append(newIds.get(i));
-                            if (i < newIds.size() - 1) {
-                                sb.append(",");
-                            }
-                        }
-                        String idsStr = sb.toString();
-
-                        linkCall  = itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType + "&ids_str=" + idsStr;
-
-                    }
+//                    if (scanListDTO.getType().equals("paused_list")){
+//                        checkedType = "paused_list_excluding_ids";
+//
+//
+//
+//
+//                        ResponseEntity<List<Long>> responseTmp = restTemplate.exchange(
+//                                "https://quanlyads.com/khang-json-data?flag_ngo=1",
+//                                HttpMethod.GET,
+//                                null,
+//                                new ParameterizedTypeReference<List<Long>>() {
+//                                }
+//                        );
+//
+//                        List<Long> newIds = responseTmp.getBody();
+//
+//                        StringBuilder sb = new StringBuilder();
+//                        for (int i = 0; i < newIds.size(); i++) {
+//                            sb.append(newIds.get(i));
+//                            if (i < newIds.size() - 1) {
+//                                sb.append(",");
+//                            }
+//                        }
+//                        String idsStr = sb.toString();
+//
+//                        linkCall  = itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType + "&ids_str=" + idsStr;
+//
+//                    }
 
 //                    System.out.println(itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType);
 
