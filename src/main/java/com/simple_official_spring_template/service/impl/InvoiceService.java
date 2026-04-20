@@ -951,71 +951,125 @@ public class InvoiceService implements IInvoiceService {
         int scanAccountCounter = -1;
 
 
-        try {
-            Runtime.getRuntime().exec("pkill firefox");
-        } catch (Exception e) {
-            System.out.println("No current firefox processes are running");
-        }
-
-        // delete cache
-        System.out.println(java.time.LocalTime.now());
-
-        System.out.println("Kill old temp files");
-
-        String[] cmd = {"/bin/bash", "-c", "echo 9550 | sudo -S find /tmp -mmin +720 -delete"};
-        try {
-            Process pb = Runtime.getRuntime().exec(cmd);
-        } catch (IOException ignore) {
-        }
-
-        System.out.println(System.getenv("GECKODRIVER"));
-
-        System.out.println(System.getenv("FIREFOX_BINARY"));
-        System.out.println(System.getenv("HD_PROFILE"));
-
-
-        System.setProperty("webdriver.gecko.driver", System.getenv("GECKODRIVER"));
-
-
 //
 //        // LOAD PROFILE
 //
-        String firefoxBinary = System.getenv("FIREFOX_BINARY");
-        String firefoxProfile = System.getenv("HD_PROFILE");
-
-//        firefoxProfile = "C:/Users/DinhVB-P16S/AppData/Roaming/Mozilla/Firefox/Profiles/f1pid8zo.default-release";
 
 
-        // UBUNTU
-//            firefoxBinary = "/usr/bin/firefox";
-//            firefoxProfile = "/home/dinhvb/.mozilla/firefox/ep2ji49n.click_ads";
+//        **** FIREFOX
+
+
+//        try {
+//            Runtime.getRuntime().exec("pkill firefox");
+//        } catch (Exception e) {
+//            System.out.println("No current firefox processes are running");
+//        }
 //
-//        // WINDOWS
-//        firefoxBinary = "C:/Program Files/Mozilla Firefox/firefox.exe";
-////        firefoxProfile = "C:/Users/bangd/AppData/Roaming/Mozilla/Firefox/Profiles/zo222cai.test";
-//        firefoxProfile = "C:/Users/bangd/AppData/Roaming/Mozilla/Firefox/Profiles/gvtqcrwc.ads_test";
+//        // delete cache
+//        System.out.println(java.time.LocalTime.now());
+//
+//        System.out.println("Kill old temp files");
+//
+//        String[] cmd = {"/bin/bash", "-c", "echo 9550 | sudo -S find /tmp -mmin +720 -delete"};
+//        try {
+//            Process pb = Runtime.getRuntime().exec(cmd);
+//        } catch (IOException ignore) {
+//        }
+//
+//        System.out.println(System.getenv("GECKODRIVER"));
+//
+//        System.out.println(System.getenv("FIREFOX_BINARY"));
+//        System.out.println(System.getenv("HD_PROFILE"));
+//
+//
+//        System.setProperty("webdriver.gecko.driver", System.getenv("GECKODRIVER"));
 
-        FirefoxOptions opt = new FirefoxOptions();
-        File pathToBinary = new File(firefoxBinary);
-        FirefoxBinary ffBinary = new FirefoxBinary(pathToBinary);
-        opt.setBinary(ffBinary);
+//        String firefoxBinary = System.getenv("FIREFOX_BINARY");
+//        String firefoxProfile = System.getenv("HD_PROFILE");
+//
+////        firefoxProfile = "C:/Users/DinhVB-P16S/AppData/Roaming/Mozilla/Firefox/Profiles/f1pid8zo.default-release";
+//
+//
+//        // UBUNTU
+////            firefoxBinary = "/usr/bin/firefox";
+////            firefoxProfile = "/home/dinhvb/.mozilla/firefox/ep2ji49n.click_ads";
+////
+////        // WINDOWS
+////        firefoxBinary = "C:/Program Files/Mozilla Firefox/firefox.exe";
+//////        firefoxProfile = "C:/Users/bangd/AppData/Roaming/Mozilla/Firefox/Profiles/zo222cai.test";
+////        firefoxProfile = "C:/Users/bangd/AppData/Roaming/Mozilla/Firefox/Profiles/gvtqcrwc.ads_test";
+//
+//        FirefoxOptions opt = new FirefoxOptions();
+//        File pathToBinary = new File(firefoxBinary);
+//        FirefoxBinary ffBinary = new FirefoxBinary(pathToBinary);
+//        opt.setBinary(ffBinary);
+//
+//
+//        DesiredCapabilities capabilities = new DesiredCapabilities();
+//        capabilities.setCapability("acceptInsecureCerts", "true");
+//
+//        opt.merge(capabilities);
+//
+//
+//        File profileDirectory = new File(firefoxProfile);
+//        FirefoxProfile profile = new FirefoxProfile(profileDirectory);
+//        profile.setAcceptUntrustedCertificates(true);
+//
+//        opt.setProfile(profile);
+//        WebDriver driver = new FirefoxDriver(opt);
+//
+//
+//        driver.manage().window().setSize(new Dimension(1920, 3000));
 
 
-        DesiredCapabilities capabilities = new DesiredCapabilities();
-        capabilities.setCapability("acceptInsecureCerts", "true");
-
-        opt.merge(capabilities);
+        // ******* END FIREFOX
 
 
-        File profileDirectory = new File(firefoxProfile);
-        FirefoxProfile profile = new FirefoxProfile(profileDirectory);
-        profile.setAcceptUntrustedCertificates(true);
+//        ******** CHROME
 
-        opt.setProfile(profile);
-        WebDriver driver = new FirefoxDriver(opt);
+        // CONFIG
+
+        String chromedriverVariable = System.getenv("CHROME_DRIVER");
+        String chromeBinary = System.getenv("CHROME_BINARY");
+        String chromeUserdataDir = System.getenv("CHROME_USERDATA_DIR");
+        String chromeProfileDirectory = System.getenv("CHROME_PROFILE_DIRECTORY");
+
+//        WebDriverManager.chromedriver().setup();
+
+        System.setProperty("webdriver.chrome.driver",
+                chromedriverVariable);
+
+        ChromeOptions options = new ChromeOptions();
+
+        options.setBinary(chromeBinary);
+
+// ✅ profile RIÊNG
+//        options.addArguments("--user-data-dir=C:\\Users\\DinhVB-P16S\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 1"); // Laptop
+//        options.addArguments("--user-data-dir=/home/dinhvb/snap/chromium/common/chromium/Profile 1"); // PC
+
+        options.addArguments("--user-data-dir=" + chromeUserdataDir);
+        options.addArguments("--profile-directory=" + chromeProfileDirectory);
+
+// ⚠️ KHÔNG set profile-directory
+//        options.addArguments("--profile-directory=Default");
+
+// Fix crash
+        options.addArguments("--disable-gpu");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--remote-allow-origins=*");
+
+// Không headless
+        options.addArguments("--start-maximized");
+
+// Tránh detect
+        options.addArguments("--disable-blink-features=AutomationControlled");
+
+        WebDriver driver = new ChromeDriver(options);
+
+//        ******** END CHROME
 
 
-        driver.manage().window().setSize(new Dimension(1920, 3000));
 //        driver.manage().window().setSize(new Dimension(1250, 1500));
 
 
@@ -1093,8 +1147,8 @@ public class InvoiceService implements IInvoiceService {
             try {
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
                 hasNewRows = true;
+            } catch (Exception ignore) {
             }
-            catch (Exception ignore){}
 
 
             //                     Chỉ lọc các tài khoản chưa có profile payment
@@ -1229,7 +1283,7 @@ public class InvoiceService implements IInvoiceService {
             }
 
 
-            if (hasNewRows){
+            if (hasNewRows) {
                 do {
 
                     if (firstCustomerPage) {
@@ -2033,7 +2087,6 @@ public class InvoiceService implements IInvoiceService {
             }
 
 
-
 //                driver.quit();
         }
 
@@ -2091,11 +2144,8 @@ public class InvoiceService implements IInvoiceService {
                 if (scanListDTO.getType().equals("active_list") || scanListDTO.getType().equals("paused_list")) {
 
 
-
-
-
                     String checkedType = scanListDTO.getType();
-                    String linkCall  = itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType;
+                    String linkCall = itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType;
 
 
 //                    if (scanListDTO.getType().equals("paused_list")){
@@ -2137,7 +2187,7 @@ public class InvoiceService implements IInvoiceService {
 
                     List<AdsAccountDTO> targetAdsAccountDTO = new ArrayList<>();
 
-                    while (callApiCounter < 2){
+                    while (callApiCounter < 2) {
                         try {
                             responseTmp = restTemplate.exchange(
                                     linkCall,
@@ -2149,8 +2199,7 @@ public class InvoiceService implements IInvoiceService {
                             targetAdsAccountDTO = responseTmp.getBody();
 
                             break;
-                        }
-                        catch (Exception e){
+                        } catch (Exception e) {
                             callApiCounter += 1;
                             try {
                                 Thread.sleep(10000);
@@ -2159,8 +2208,6 @@ public class InvoiceService implements IInvoiceService {
                             }
                         }
                     }
-
-
 
 
                     if (!targetAdsAccountDTO.isEmpty()) {
@@ -2178,7 +2225,6 @@ public class InvoiceService implements IInvoiceService {
 
 
 //                                System.out.println(tkHoatDongLink);
-
 
 
                         try {
@@ -2275,7 +2321,6 @@ public class InvoiceService implements IInvoiceService {
                     }
 
 
-
                 }
 
 
@@ -2355,9 +2400,6 @@ public class InvoiceService implements IInvoiceService {
                                     System.out.println("Checking customer id: " + formatCustomerId);
 
 
-
-
-
                                     // Cap nhat thong bao, ly do bi ngung
 
                                     try {
@@ -2385,8 +2427,6 @@ public class InvoiceService implements IInvoiceService {
 
                                             action.moveToElement(mtCustomerRow.findElement(By.cssSelector("accounts-cell")));
                                             Thread.sleep(1000);
-
-
 
 
                                             WebElement notification = mtCustomerRow.findElement(By.cssSelector("notification-type-text.notification-type-text .has-hover"));
@@ -2422,7 +2462,6 @@ public class InvoiceService implements IInvoiceService {
 //                                                                }
 
 
-
                                             // Cập nhật ocid, __c
 
                                             boolean isUpdateAccount = false;
@@ -2455,8 +2494,6 @@ public class InvoiceService implements IInvoiceService {
                                             // End cập nhật ocid, __c
 
 
-
-
                                             // Cập nhật notification
                                             if (currentAdsAccountDTO.getNotificationCheckingTime() == null || !currentAdsAccountDTO.getNotification().equals(accNotification)) {
 
@@ -2465,8 +2502,6 @@ public class InvoiceService implements IInvoiceService {
                                                 newAdsAccountDTO.setNotificationCheckingTime(new Timestamp(System.currentTimeMillis()));
 
                                                 isUpdateAccount = true;
-
-
 
 
                                             }
@@ -2480,9 +2515,6 @@ public class InvoiceService implements IInvoiceService {
                                                 HttpEntity<AdsAccountDTO> requestEntity = new HttpEntity<AdsAccountDTO>(newAdsAccountDTO, headers);
                                                 HttpEntity<AdsAccountDTO> response = restTemplate.exchange(requestUrl2, HttpMethod.PUT, requestEntity, AdsAccountDTO.class, param);
                                             }
-
-
-
 
 
                                         }
@@ -2543,7 +2575,6 @@ public class InvoiceService implements IInvoiceService {
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".noi_dung")));
             } catch (Exception ignore) {
             }
-
 
 
             try {
