@@ -1048,7 +1048,19 @@ public class InvoiceService implements IInvoiceService {
 //        options.addArguments("--user-data-dir=/home/dinhvb/snap/chromium/common/chromium/Profile 1"); // PC
 
         options.addArguments("--user-data-dir=" + chromeUserdataDir);
-        options.addArguments("--profile-directory=" + chromeProfileDirectory);
+
+
+//        Tạo profile bằng lệnh"
+//        chrome.exe --user-data-dir="C:\selenium-profile"
+
+//        Mở prfile
+//        "C:\Program Files\Google\Chrome\Application\chrome.exe" --user-data-dir="C:\selenium-profile"
+
+
+//        options.addArguments("--profile-directory=" + chromeProfileDirectory);
+
+
+
 
 // ⚠️ KHÔNG set profile-directory
 //        options.addArguments("--profile-directory=Default");
