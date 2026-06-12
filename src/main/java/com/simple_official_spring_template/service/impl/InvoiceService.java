@@ -1164,7 +1164,7 @@ public class InvoiceService implements IInvoiceService {
 
 
             //                     Chỉ lọc các tài khoản chưa có profile payment
-            if (false) {
+            if (true) {
                 if (hasNewRows) {
                     ResponseEntity<List<AdsAccountDTO>> responseTmpMain = restTemplate.exchange(
                             itgreenToolServer + "/api-ads-account/payments-profile-not-null",
