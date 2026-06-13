@@ -1163,8 +1163,38 @@ public class InvoiceService implements IInvoiceService {
             }
 
 
-            //                     Chỉ lọc các tài khoản chưa có profile payment
-            if (true) {
+            boolean filterAccount = true;
+            List<WebElement> predicateEditorList = driver.findElements(By.cssSelector("predicate-editor"));
+            if (predicateEditorList.size() > 0){
+                for (WebElement predicateEditorElement: predicateEditorList){
+                    System.out.println(predicateEditorElement.findElement(By.cssSelector(".chip-content-container .content")).getText());
+
+                    if (predicateEditorElement.findElement(By.cssSelector(".chip-content-container .content")).getText().contains("Mã khách hàng không chứa")) {
+                        predicateEditorElement.findElement(By.cssSelector(".delete-icon-container")).click();
+
+                        try {
+//                            fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
+//                            fastWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
+                            Thread.sleep(5000);
+                            try {
+                                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
+                                hasNewRows = true;
+                            } catch (Exception ignore) {
+                            }
+
+                        } catch (Exception ignore) {
+
+                        }
+
+
+                        break;
+                    }
+
+                }
+            }
+
+            // Lưu danh sách tài khoản vào filter
+            if (filterAccount) {
                 if (hasNewRows) {
                     ResponseEntity<List<AdsAccountDTO>> responseTmpMain = restTemplate.exchange(
                             itgreenToolServer + "/api-ads-account/payments-profile-not-null",
@@ -2160,37 +2190,37 @@ public class InvoiceService implements IInvoiceService {
                     String linkCall = itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType;
 
 
-//                    if (scanListDTO.getType().equals("paused_list")){
-//                        checkedType = "paused_list_excluding_ids";
-//
-//
-//
-//
-//                        ResponseEntity<List<Long>> responseTmp = restTemplate.exchange(
-//                                "https://quanlyads.com/khang-json-data?flag_ngo=1",
-//                                HttpMethod.GET,
-//                                null,
-//                                new ParameterizedTypeReference<List<Long>>() {
-//                                }
-//                        );
-//
-//                        List<Long> newIds = responseTmp.getBody();
-//
-//                        StringBuilder sb = new StringBuilder();
-//                        for (int i = 0; i < newIds.size(); i++) {
-//                            sb.append(newIds.get(i));
-//                            if (i < newIds.size() - 1) {
-//                                sb.append(",");
-//                            }
-//                        }
-//                        String idsStr = sb.toString();
-//
-//                        linkCall  = itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType + "&ids_str=" + idsStr;
-//
-//                    }
+                    if (scanListDTO.getType().equals("paused_list")){
+                        checkedType = "paused_list_excluding_ids";
+
+
+
+
+                        ResponseEntity<List<Long>> responseTmp = restTemplate.exchange(
+                                "https://quanlyads.com/khang-json-data?flag_ngo=1",
+                                HttpMethod.GET,
+                                null,
+                                new ParameterizedTypeReference<List<Long>>() {
+                                }
+                        );
+
+                        List<Long> newIds = responseTmp.getBody();
+
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < newIds.size(); i++) {
+                            sb.append(newIds.get(i));
+                            if (i < newIds.size() - 1) {
+                                sb.append(",");
+                            }
+                        }
+                        String idsStr = sb.toString();
+
+                        linkCall  = itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType + "&ids_str=" + idsStr;
+
+                    }
 
 //                    System.out.println(itgreenToolServer + "/api-ads-account/list?list_type=" + checkedType);
-
+//
 //                    System.out.println(linkCall);
 
 
