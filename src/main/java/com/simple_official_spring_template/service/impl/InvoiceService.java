@@ -1119,12 +1119,15 @@ public class InvoiceService implements IInvoiceService {
         }
 
 
+
+
         for (String[] fetchLinksItem : fetchLinksList) {
 
 
             // fetch new links
 //            driver.get("https://ads.google.com/aw/budgets?ocid=194893325&euid=102741392&__u=7656001808&uscid=194893325&__c=9578557925");
             driver.get(fetchLinksItem[0]);
+            js.executeScript("document.body.style.zoom='70%'");
 
             try {
                 fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
