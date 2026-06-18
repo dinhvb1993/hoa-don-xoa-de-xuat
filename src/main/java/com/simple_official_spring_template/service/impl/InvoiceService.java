@@ -1113,28 +1113,32 @@ public class InvoiceService implements IInvoiceService {
 
         // Chỉ quét lấy link tk, không mở tab mới
         boolean onlyCheckLink = false;
+        boolean ignore_check_new_list_acc = false;
 
         if (autoMode.equals("only_check_list")) {
             onlyCheckLink = true;
         }
 
+        if (autoMode.equals("ignore_check_new_list_acc")) {
+            ignore_check_new_list_acc = true;
+        }
 
 
+        if (ignore_check_new_list_acc == false){
+            for (String[] fetchLinksItem : fetchLinksList) {
 
-        for (String[] fetchLinksItem : fetchLinksList) {
 
-
-            // fetch new links
+                // fetch new links
 //            driver.get("https://ads.google.com/aw/budgets?ocid=194893325&euid=102741392&__u=7656001808&uscid=194893325&__c=9578557925");
-            driver.get(fetchLinksItem[0]);
-            js.executeScript("document.body.style.zoom='70%'");
+                driver.get(fetchLinksItem[0]);
+                js.executeScript("document.body.style.zoom='70%'");
 
-            try {
-                fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
-                fastWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
-            } catch (Exception ignore) {
+                try {
+                    fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
+                    fastWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
+                } catch (Exception ignore) {
 
-            }
+                }
 
 //            try {
 //                List<WebElement> deleteIconList = driver.findElements(By.cssSelector(".predicates-container material-chip .content-with-delete .delete-icon-container"));
@@ -1153,109 +1157,109 @@ public class InvoiceService implements IInvoiceService {
 //            }
 
 
-            Long mainLoginCustomerId = Long.valueOf(fetchLinksItem[1]);
+                Long mainLoginCustomerId = Long.valueOf(fetchLinksItem[1]);
 
 
-            boolean firstCustomerPage = true;
+                boolean firstCustomerPage = true;
 
-            boolean hasNewRows = false;
-            try {
-                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
-                hasNewRows = true;
-            } catch (Exception ignore) {
-            }
+                boolean hasNewRows = false;
+                try {
+                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
+                    hasNewRows = true;
+                } catch (Exception ignore) {
+                }
 
 
-            boolean filterAccount = true;
-            List<WebElement> predicateEditorList = driver.findElements(By.cssSelector("predicate-editor"));
-            if (predicateEditorList.size() > 0){
-                for (WebElement predicateEditorElement: predicateEditorList){
-                    System.out.println(predicateEditorElement.findElement(By.cssSelector(".chip-content-container .content")).getText());
+                boolean filterAccount = true;
+                List<WebElement> predicateEditorList = driver.findElements(By.cssSelector("predicate-editor"));
+                if (predicateEditorList.size() > 0){
+                    for (WebElement predicateEditorElement: predicateEditorList){
+                        System.out.println(predicateEditorElement.findElement(By.cssSelector(".chip-content-container .content")).getText());
 
-                    if (predicateEditorElement.findElement(By.cssSelector(".chip-content-container .content")).getText().contains("Mã khách hàng không chứa")) {
-                        predicateEditorElement.findElement(By.cssSelector(".delete-icon-container")).click();
+                        if (predicateEditorElement.findElement(By.cssSelector(".chip-content-container .content")).getText().contains("Mã khách hàng không chứa")) {
+                            predicateEditorElement.findElement(By.cssSelector(".delete-icon-container")).click();
 
-                        try {
+                            try {
 //                            fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
 //                            fastWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
-                            Thread.sleep(5000);
-                            try {
-                                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
-                                hasNewRows = true;
+                                Thread.sleep(5000);
+                                try {
+                                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
+                                    hasNewRows = true;
+                                } catch (Exception ignore) {
+                                }
+
                             } catch (Exception ignore) {
+
                             }
 
-                        } catch (Exception ignore) {
 
+                            break;
                         }
 
-
-                        break;
                     }
-
                 }
-            }
 
-            // Lưu danh sách tài khoản vào filter
-            if (filterAccount) {
-                if (hasNewRows) {
-                    ResponseEntity<List<AdsAccountDTO>> responseTmpMain = restTemplate.exchange(
-                            itgreenToolServer + "/api-ads-account/payments-profile-not-null",
-                            HttpMethod.GET,
-                            null,
-                            new ParameterizedTypeReference<List<AdsAccountDTO>>() {
+                // Lưu danh sách tài khoản vào filter
+                if (filterAccount) {
+                    if (hasNewRows) {
+                        ResponseEntity<List<AdsAccountDTO>> responseTmpMain = restTemplate.exchange(
+                                itgreenToolServer + "/api-ads-account/payments-profile-not-null",
+                                HttpMethod.GET,
+                                null,
+                                new ParameterizedTypeReference<List<AdsAccountDTO>>() {
+                                }
+                        );
+
+                        List<AdsAccountDTO> targetAdsAccountDTO1 = responseTmpMain.getBody();
+
+                        if (!targetAdsAccountDTO1.isEmpty()) {
+
+                            String excludedAccountString = "";
+                            for (AdsAccountDTO accountDTOItem : targetAdsAccountDTO1) {
+                                if (!excludedAccountString.equals("")) {
+                                    excludedAccountString += "\n";
+                                }
+                                excludedAccountString += accountDTOItem.getId();
                             }
-                    );
-
-                    List<AdsAccountDTO> targetAdsAccountDTO1 = responseTmpMain.getBody();
-
-                    if (!targetAdsAccountDTO1.isEmpty()) {
-
-                        String excludedAccountString = "";
-                        for (AdsAccountDTO accountDTOItem : targetAdsAccountDTO1) {
-                            if (!excludedAccountString.equals("")) {
-                                excludedAccountString += "\n";
-                            }
-                            excludedAccountString += accountDTOItem.getId();
-                        }
 
 
-                        //                                    String tkHoatDongLink = "https://ads.google.com/aw/notifications?ocid=194893325&__u=7656001808&__c=9578557925&ascid=194893325&tableState=Eg8SDQoEdHlwZRADIgMI2w8%3D";
+                            //                                    String tkHoatDongLink = "https://ads.google.com/aw/notifications?ocid=194893325&__u=7656001808&__c=9578557925&ascid=194893325&tableState=Eg8SDQoEdHlwZRADIgMI2w8%3D";
 
 
 //                                System.out.println(tkHoatDongLink);
 
 //                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
 
-                        try {
-                            Thread.sleep(3000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                            try {
+                                Thread.sleep(3000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
 
-                        try {
-                            fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("awsm-child-content toolbelt-bar .extended-predicates-container material-button.add-filter-btn"))).click();
-                        } catch (Exception ignore) {
-                        }
+                            try {
+                                fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("awsm-child-content toolbelt-bar .extended-predicates-container material-button.add-filter-btn"))).click();
+                            } catch (Exception ignore) {
+                            }
 
-                        try {
-                            Thread.sleep(1000);
-                            fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".material-popup-content focus-trap .popup-search-box-wrapper input.search-box"))).sendKeys("Mã khách hàng");
-                            Thread.sleep(1000);
-                            fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".suggestion-list material-select-item[aria-label=\"Mã khách hàng\"]"))).click();
-                            Thread.sleep(1000);
+                            try {
+                                Thread.sleep(1000);
+                                fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".material-popup-content focus-trap .popup-search-box-wrapper input.search-box"))).sendKeys("Mã khách hàng");
+                                Thread.sleep(1000);
+                                fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".suggestion-list material-select-item[aria-label=\"Mã khách hàng\"]"))).click();
+                                Thread.sleep(1000);
 //                                    wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("material-dropdown-select dropdown-button material-icon.icon"))).click();
-                            fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("predicate-operator material-dropdown-select dropdown-button"))).click();
-                            Thread.sleep(1000);
-                            fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".material-popup-content material-list material-select-dropdown-item:nth-child(2) span"))).click();
+                                fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("predicate-operator material-dropdown-select dropdown-button"))).click();
+                                Thread.sleep(1000);
+                                fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".material-popup-content material-list material-select-dropdown-item:nth-child(2) span"))).click();
 
 
-                            Thread.sleep(1000);
+                                Thread.sleep(1000);
 //                        fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("focus-trap filter-editor-string material-input textarea"))).sendKeys(excludedAccountString);
 
-                            WebElement element = driver.findElement(By.cssSelector("focus-trap filter-editor-string material-input textarea"));
-                            js.executeScript("arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));",
-                                    element, excludedAccountString);
+                                WebElement element = driver.findElement(By.cssSelector("focus-trap filter-editor-string material-input textarea"));
+                                js.executeScript("arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input', { bubbles: true }));",
+                                        element, excludedAccountString);
 
 
 //                            fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("focus-trap filter-editor-string material-input textarea"))).click();
@@ -1278,12 +1282,12 @@ public class InvoiceService implements IInvoiceService {
 //                            robot.keyPress(KeyEvent.VK_V);
 //                            robot.keyRelease(KeyEvent.VK_V);
 //                            robot.keyRelease(KeyEvent.VK_CONTROL);
-                            // END Kiểu khác: Dùng clipboard
+                                // END Kiểu khác: Dùng clipboard
 
 
-                            Thread.sleep(2000);
-                            try {
-                                System.out.println("Chờ nhấn nút lọc");
+                                Thread.sleep(2000);
+                                try {
+                                    System.out.println("Chờ nhấn nút lọc");
 
 //                            WebElement applyBtn = fastWait.until(
 //                                    ExpectedConditions.presenceOfElementLocated(By.cssSelector("focus-trap .footer material-button"))
@@ -1291,67 +1295,67 @@ public class InvoiceService implements IInvoiceService {
 //                            fastWait.until(ExpectedConditions.elementToBeClickable(applyBtn)).click();
 
 
-                                By applyBtn = By.cssSelector("focus-trap .footer material-button");
-                                safeClickMaterial(driver, applyBtn);
+                                    By applyBtn = By.cssSelector("focus-trap .footer material-button");
+                                    safeClickMaterial(driver, applyBtn);
 
 
-                            } catch (Exception e2) {
+                                } catch (Exception e2) {
 
-                                System.out.println("Không click nút lọc được");
+                                    System.out.println("Không click nút lọc được");
 //                                                    e2.printStackTrace();
 //
 //                                                    fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("focus-trap .footer material-button material-ripple"))).click();
+                                    continue;
+                                }
+
+                                try {
+                                    fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
+                                    fastWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
+                                } catch (Exception ignore) {
+
+                                }
+                                Thread.sleep(3000);
+
+                                List<WebElement> mtCustomerRows = driver.findElements(By.cssSelector(".particle-table-row"));
+                                if (mtCustomerRows.isEmpty()) {
+                                    continue;
+                                }
+
+                            } catch (Exception e) {
                                 continue;
                             }
 
+
+                        }
+                    }
+
+                }
+
+
+                if (hasNewRows) {
+                    do {
+
+                        if (firstCustomerPage) {
+                            firstCustomerPage = false;
+                        } else {
+                            // next page
+
+
                             try {
+                                driver.findElement(By.cssSelector(".pager-buttons material-button.next")).click();
                                 fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
                                 fastWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
                             } catch (Exception ignore) {
-
+                                break;
                             }
-                            Thread.sleep(3000);
-
-                            List<WebElement> mtCustomerRows = driver.findElements(By.cssSelector(".particle-table-row"));
-                            if (mtCustomerRows.isEmpty()) {
-                                continue;
-                            }
-
-                        } catch (Exception e) {
-                            continue;
                         }
-
-
-                    }
-                }
-
-            }
-
-
-            if (hasNewRows) {
-                do {
-
-                    if (firstCustomerPage) {
-                        firstCustomerPage = false;
-                    } else {
-                        // next page
 
 
                         try {
-                            driver.findElement(By.cssSelector(".pager-buttons material-button.next")).click();
-                            fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
-                            fastWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
-                        } catch (Exception ignore) {
+                            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
+                        } catch (Exception e2) {
                             break;
                         }
-                    }
-
-
-                    try {
-                        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
-                    } catch (Exception e2) {
-                        break;
-                    }
 
 
 //                Xóa bộ lọc kiểu 1
@@ -1397,53 +1401,53 @@ public class InvoiceService implements IInvoiceService {
 
 
 //                String query = "document.querySelector(\".base-root\").scrollTop=6000;";
-                    String query = "window.scrollTo({top: 3000, behavior: 'smooth'})";
-                    try {
-                        js.executeScript(query);
-                    } catch (Exception ignored) {
-
-                    }
-
-
-                    List<WebElement> customerRows = driver.findElements(By.cssSelector(".particle-table-row"));
-
-                    for (WebElement customerRow : customerRows) {
-
-                        scanAccountCounter += 1;
-
+                        String query = "window.scrollTo({top: 3000, behavior: 'smooth'})";
                         try {
+                            js.executeScript(query);
+                        } catch (Exception ignored) {
+
+                        }
 
 
-                            WebElement accountCellLink = customerRow.findElement(By.cssSelector(".account-cell-link"));
+                        List<WebElement> customerRows = driver.findElements(By.cssSelector(".particle-table-row"));
 
-                            String accountCellHref = accountCellLink.getAttribute("href");
+                        for (WebElement customerRow : customerRows) {
 
+                            scanAccountCounter += 1;
 
-                            AdsAccountDTO adsAccountDTO = new AdsAccountDTO();
-
-
-                            String customerCellId = "";
                             try {
-                                customerCellId = customerRow.findElement(By.cssSelector(".external-customer-id")).getText();
-                            } catch (Exception u) {
-                                customerCellId = accountCellLink.getText();
-                            }
 
-                            customerCellId = customerCellId.replaceAll("-", "");
 
-                            String formatCustomerId = "";
+                                WebElement accountCellLink = customerRow.findElement(By.cssSelector(".account-cell-link"));
 
-                            for (int i = 0; i < customerCellId.length(); i++) {
-                                if (Character.isDigit(customerCellId.charAt(i))) {
-                                    formatCustomerId += customerCellId.charAt(i);
-                                } else {
-                                    break;
+                                String accountCellHref = accountCellLink.getAttribute("href");
+
+
+                                AdsAccountDTO adsAccountDTO = new AdsAccountDTO();
+
+
+                                String customerCellId = "";
+                                try {
+                                    customerCellId = customerRow.findElement(By.cssSelector(".external-customer-id")).getText();
+                                } catch (Exception u) {
+                                    customerCellId = accountCellLink.getText();
                                 }
-                            }
 
-                            customerCellId = formatCustomerId;
+                                customerCellId = customerCellId.replaceAll("-", "");
 
-                            System.out.println(customerCellId);
+                                String formatCustomerId = "";
+
+                                for (int i = 0; i < customerCellId.length(); i++) {
+                                    if (Character.isDigit(customerCellId.charAt(i))) {
+                                        formatCustomerId += customerCellId.charAt(i);
+                                    } else {
+                                        break;
+                                    }
+                                }
+
+                                customerCellId = formatCustomerId;
+
+                                System.out.println(customerCellId);
 
 //                        System.out.println(customerCellId);
 //                        System.out.println(accountCellLink.getText());
@@ -1464,81 +1468,81 @@ public class InvoiceService implements IInvoiceService {
 //                    System.out.println("CHECKING: " + customerCellId + " - " + accountCellLink.getText());
 
 
-                            adsAccountDTO.setId(Long.parseLong(customerCellId));
+                                adsAccountDTO.setId(Long.parseLong(customerCellId));
 
 
-                            // ******** KIỂM TRA TK TRÊN DB
+                                // ******** KIỂM TRA TK TRÊN DB
 
-                            // Tạo mới nếu chưa có
+                                // Tạo mới nếu chưa có
 
-                            boolean isUpdateAccount = false;
-
-
-                            AdsAccountDTO dbAdsAccountDTO = null;
-                            try {
+                                boolean isUpdateAccount = false;
 
 
-                                dbAdsAccountDTO = restTemplate.getForObject(itgreenToolServer + "/api-ads-account/" + adsAccountDTO.getId(), AdsAccountDTO.class);
+                                AdsAccountDTO dbAdsAccountDTO = null;
+                                try {
 
 
-                            } catch (Exception failed) {
-
-                                System.out.println("Not found in database. May be server error");
-
-                                continue;
-                            }
+                                    dbAdsAccountDTO = restTemplate.getForObject(itgreenToolServer + "/api-ads-account/" + adsAccountDTO.getId(), AdsAccountDTO.class);
 
 
-                            if (dbAdsAccountDTO == null) {
-                                isUpdateAccount = true;
-                                adsAccountDTO.setDescriptiveName(accountCellLink.getText());
-//                            Long loginCustomerId = 7835319390L;
-                                adsAccountDTO.setLoginCustomerId(mainLoginCustomerId);
+                                } catch (Exception failed) {
 
-                                dbAdsAccountDTO = restTemplate.postForObject(itgreenToolServer + "/api-ads-account/", adsAccountDTO, AdsAccountDTO.class);
-                            } else {
-                                if (dbAdsAccountDTO.getDescriptiveName() == null || !dbAdsAccountDTO.getDescriptiveName().equals(accountCellLink.getText())) {
-                                    adsAccountDTO.setDescriptiveName(accountCellLink.getText());
+                                    System.out.println("Not found in database. May be server error");
 
-                                    isUpdateAccount = true;
+                                    continue;
                                 }
 
-                                if (dbAdsAccountDTO.getLoginCustomerId() == null || !dbAdsAccountDTO.getLoginCustomerId().equals(mainLoginCustomerId)) {
+
+                                if (dbAdsAccountDTO == null) {
+                                    isUpdateAccount = true;
+                                    adsAccountDTO.setDescriptiveName(accountCellLink.getText());
+//                            Long loginCustomerId = 7835319390L;
                                     adsAccountDTO.setLoginCustomerId(mainLoginCustomerId);
 
-                                    isUpdateAccount = true;
+                                    dbAdsAccountDTO = restTemplate.postForObject(itgreenToolServer + "/api-ads-account/", adsAccountDTO, AdsAccountDTO.class);
+                                } else {
+                                    if (dbAdsAccountDTO.getDescriptiveName() == null || !dbAdsAccountDTO.getDescriptiveName().equals(accountCellLink.getText())) {
+                                        adsAccountDTO.setDescriptiveName(accountCellLink.getText());
+
+                                        isUpdateAccount = true;
+                                    }
+
+                                    if (dbAdsAccountDTO.getLoginCustomerId() == null || !dbAdsAccountDTO.getLoginCustomerId().equals(mainLoginCustomerId)) {
+                                        adsAccountDTO.setLoginCustomerId(mainLoginCustomerId);
+
+                                        isUpdateAccount = true;
+                                    }
                                 }
-                            }
 
 
 //                        action.moveToElement(element).perform();
 
 
-                            Map<String, List<String>> queryParams = getQueryParams(accountCellHref);
+                                Map<String, List<String>> queryParams = getQueryParams(accountCellHref);
 
 
-                            if (dbAdsAccountDTO.getOcid() == null) {
-                                if (queryParams.get("ocid") != null) {
-                                    isUpdateAccount = true;
-                                    adsAccountDTO.setOcid(getQueryParams(accountCellHref).get("ocid").get(0));
+                                if (dbAdsAccountDTO.getOcid() == null) {
+                                    if (queryParams.get("ocid") != null) {
+                                        isUpdateAccount = true;
+                                        adsAccountDTO.setOcid(getQueryParams(accountCellHref).get("ocid").get(0));
+                                    }
                                 }
-                            }
-                            if (dbAdsAccountDTO.getAscid() == null) {
-                                if (queryParams.get("ascid") != null) {
-                                    isUpdateAccount = true;
-                                    adsAccountDTO.setAscid(getQueryParams(accountCellHref).get("ascid").get(0));
+                                if (dbAdsAccountDTO.getAscid() == null) {
+                                    if (queryParams.get("ascid") != null) {
+                                        isUpdateAccount = true;
+                                        adsAccountDTO.setAscid(getQueryParams(accountCellHref).get("ascid").get(0));
+                                    }
                                 }
-                            }
 
 
-                            if (dbAdsAccountDTO.getC() == null) {
-                                if (queryParams.get("__c") != null) {
-                                    isUpdateAccount = true;
-                                    adsAccountDTO.setC(getQueryParams(accountCellHref).get("__c").get(0));
+                                if (dbAdsAccountDTO.getC() == null) {
+                                    if (queryParams.get("__c") != null) {
+                                        isUpdateAccount = true;
+                                        adsAccountDTO.setC(getQueryParams(accountCellHref).get("__c").get(0));
+                                    }
                                 }
-                            }
 
-                            adsAccountDTO.setToolCheckingTime(new Timestamp(System.currentTimeMillis()));
+                                adsAccountDTO.setToolCheckingTime(new Timestamp(System.currentTimeMillis()));
 //
 //                        String directManager = null;
 //                        try {
@@ -1557,85 +1561,85 @@ public class InvoiceService implements IInvoiceService {
 //                        }
 
 
-                            try {
-                                String paymentsProfile = customerRow.findElement(By.cssSelector("payments-customer-cell .payments-customer-name")).getText();
-                                if (adsAccountDTO.getPaymentsProfile() == null && !paymentsProfile.isEmpty()) {
-                                    isUpdateAccount = true;
-                                    adsAccountDTO.setPaymentsProfile(paymentsProfile);
-                                }
-                            } catch (Exception ignore) {
-
-                            }
-
-                            try {
-                                String paymentsNumber = customerRow.findElement(By.cssSelector("payments-customer-cell .payments-customer-number")).getText();
-                                if (adsAccountDTO.getPaymentsNumber() == null && !paymentsNumber.isEmpty()) {
-                                    isUpdateAccount = true;
-                                    adsAccountDTO.setPaymentsNumber(paymentsNumber);
-                                }
-                            } catch (Exception ignore) {
-
-                            }
-
-
-                            if (onlyCheckLink == false) {
-                                //
-                                ((JavascriptExecutor) driver).executeScript("window.open()");
-                                tabs = new ArrayList<String>(driver.getWindowHandles());
-                                driver.switchTo().window(tabs.get(1));
-
-
-                                // ******** LAY SO DU
-                                if (false) {
-                                    String soDuLink = accountCellHref.replaceAll("/overview", "/billing/summary");
-                                    driver.get(soDuLink);
-
-                                    try {
-                                        String totalBalance = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".total-balance"))).getText();
-                                        String lastPaymentDate = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".last-payment-date"))).getText();
-                                        String lastPaymentAmount = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".last-payment-amount"))).getText();
-
-
-                                        Double totalBalanceValue = Double.valueOf(totalBalance.replace(" ₫", "").replace(".", ""));
-                                        Double lastPaymentAmountValue = Double.valueOf(lastPaymentAmount.replace(" ₫", "").replace(".", ""));
-
-
-                                        lastPaymentDate = lastPaymentDate.split(", ")[0];
-
-                                        String[] lastPaymentDateList = lastPaymentDate.split(" thg ");
-                                        String lastPaymentDateValue = "";
-                                        if (lastPaymentDateList[0].length() == 2) {
-                                            lastPaymentDateValue += lastPaymentDateList[0];
-                                        } else {
-                                            lastPaymentDateValue += "0" + lastPaymentDateList[0];
-                                        }
-
-                                        lastPaymentDateValue += "-";
-
-                                        if (lastPaymentDateList[1].length() == 2) {
-                                            lastPaymentDateValue += lastPaymentDateList[1];
-                                        } else {
-                                            lastPaymentDateValue += "0" + lastPaymentDateList[1];
-                                        }
-
-                                        utc = ZonedDateTime.now(ZoneOffset.of("+7"));
-
-                                        adsAccountDTO.setTotalBalance(totalBalanceValue);
-                                        adsAccountDTO.setLastPaymentAmount(lastPaymentAmountValue);
-                                        adsAccountDTO.setLastPaymentDate(lastPaymentDateValue);
-                                        adsAccountDTO.setPaymentCheckTime(utc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-
-
-                                    } catch (Exception ignore) {
+                                try {
+                                    String paymentsProfile = customerRow.findElement(By.cssSelector("payments-customer-cell .payments-customer-name")).getText();
+                                    if (adsAccountDTO.getPaymentsProfile() == null && !paymentsProfile.isEmpty()) {
+                                        isUpdateAccount = true;
+                                        adsAccountDTO.setPaymentsProfile(paymentsProfile);
                                     }
+                                } catch (Exception ignore) {
+
+                                }
+
+                                try {
+                                    String paymentsNumber = customerRow.findElement(By.cssSelector("payments-customer-cell .payments-customer-number")).getText();
+                                    if (adsAccountDTO.getPaymentsNumber() == null && !paymentsNumber.isEmpty()) {
+                                        isUpdateAccount = true;
+                                        adsAccountDTO.setPaymentsNumber(paymentsNumber);
+                                    }
+                                } catch (Exception ignore) {
+
                                 }
 
 
-                                if (false) {
-                                    //****** LAY TEN MIEN
+                                if (onlyCheckLink == false) {
+                                    //
+                                    ((JavascriptExecutor) driver).executeScript("window.open()");
+                                    tabs = new ArrayList<String>(driver.getWindowHandles());
+                                    driver.switchTo().window(tabs.get(1));
 
 
-                                    //                        Thread.sleep(1000);
+                                    // ******** LAY SO DU
+                                    if (false) {
+                                        String soDuLink = accountCellHref.replaceAll("/overview", "/billing/summary");
+                                        driver.get(soDuLink);
+
+                                        try {
+                                            String totalBalance = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".total-balance"))).getText();
+                                            String lastPaymentDate = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".last-payment-date"))).getText();
+                                            String lastPaymentAmount = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".last-payment-amount"))).getText();
+
+
+                                            Double totalBalanceValue = Double.valueOf(totalBalance.replace(" ₫", "").replace(".", ""));
+                                            Double lastPaymentAmountValue = Double.valueOf(lastPaymentAmount.replace(" ₫", "").replace(".", ""));
+
+
+                                            lastPaymentDate = lastPaymentDate.split(", ")[0];
+
+                                            String[] lastPaymentDateList = lastPaymentDate.split(" thg ");
+                                            String lastPaymentDateValue = "";
+                                            if (lastPaymentDateList[0].length() == 2) {
+                                                lastPaymentDateValue += lastPaymentDateList[0];
+                                            } else {
+                                                lastPaymentDateValue += "0" + lastPaymentDateList[0];
+                                            }
+
+                                            lastPaymentDateValue += "-";
+
+                                            if (lastPaymentDateList[1].length() == 2) {
+                                                lastPaymentDateValue += lastPaymentDateList[1];
+                                            } else {
+                                                lastPaymentDateValue += "0" + lastPaymentDateList[1];
+                                            }
+
+                                            utc = ZonedDateTime.now(ZoneOffset.of("+7"));
+
+                                            adsAccountDTO.setTotalBalance(totalBalanceValue);
+                                            adsAccountDTO.setLastPaymentAmount(lastPaymentAmountValue);
+                                            adsAccountDTO.setLastPaymentDate(lastPaymentDateValue);
+                                            adsAccountDTO.setPaymentCheckTime(utc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+
+                                        } catch (Exception ignore) {
+                                        }
+                                    }
+
+
+                                    if (false) {
+                                        //****** LAY TEN MIEN
+
+
+                                        //                        Thread.sleep(1000);
 
 //                        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-picker dropdown-button")));
 //                        System.out.println("Wait 1: ok");
@@ -1655,25 +1659,25 @@ public class InvoiceService implements IInvoiceService {
 //                        String formattedYesterday = utcYesterday.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
 
-                                    List<String> checkedDateList = new ArrayList<>();
+                                        List<String> checkedDateList = new ArrayList<>();
 
 
-                                    ///
+                                        ///
 
 //                        LocalDate startDate = LocalDate.parse("2023-11-18");
 //                        LocalDate endDate = LocalDate.parse("2023-12-13");
 
 
-                                    String lastCheckDomainDate = "";
-                                    if (dbAdsAccountDTO.getLastCheckDomainDate() != null) {
-                                        lastCheckDomainDate = dbAdsAccountDTO.getLastCheckDomainDate();
-                                    } else {
-                                        // kiem tra truoc 3 ngay
+                                        String lastCheckDomainDate = "";
+                                        if (dbAdsAccountDTO.getLastCheckDomainDate() != null) {
+                                            lastCheckDomainDate = dbAdsAccountDTO.getLastCheckDomainDate();
+                                        } else {
+                                            // kiem tra truoc 3 ngay
 
-                                        // Today: 2023-12-15 --> lastCheckDomainDate: 2023-12-11
+                                            // Today: 2023-12-15 --> lastCheckDomainDate: 2023-12-11
 
-                                        lastCheckDomainDate = ZonedDateTime.now(ZoneOffset.of("+7")).minus(5, ChronoUnit.DAYS).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                                    }
+                                            lastCheckDomainDate = ZonedDateTime.now(ZoneOffset.of("+7")).minus(5, ChronoUnit.DAYS).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                        }
 
 
 //                    ***** TEST
@@ -1684,75 +1688,75 @@ public class InvoiceService implements IInvoiceService {
 //                    ****** END TEST
 
 
-                                    // 2023-12-12 -> 2023-12-14
-                                    LocalDate startDate = LocalDate.parse(lastCheckDomainDate).plusDays(1);
+                                        // 2023-12-12 -> 2023-12-14
+                                        LocalDate startDate = LocalDate.parse(lastCheckDomainDate).plusDays(1);
 
 
-                                    utc = ZonedDateTime.now(ZoneOffset.of("+7"));
-                                    LocalDate endDate = LocalDate.parse(utc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                                        utc = ZonedDateTime.now(ZoneOffset.of("+7"));
+                                        LocalDate endDate = LocalDate.parse(utc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
 
-                                    long numOfDaysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+                                        long numOfDaysBetween = ChronoUnit.DAYS.between(startDate, endDate);
 
-                                    if (numOfDaysBetween > 0) {
-                                        //                    System.out.println("Get domain...");
-                                        String auctionInsightsLink = accountCellHref.replaceAll("/overview", "/adgroups/auctioninsights");
+                                        if (numOfDaysBetween > 0) {
+                                            //                    System.out.println("Get domain...");
+                                            String auctionInsightsLink = accountCellHref.replaceAll("/overview", "/adgroups/auctioninsights");
 
 //                    //
 //                    ((JavascriptExecutor) driver).executeScript("window.open()");
 //                    tabs = new ArrayList<String>(driver.getWindowHandles());
 //                    driver.switchTo().window(tabs.get(1));
-                                        driver.get(auctionInsightsLink);
+                                            driver.get(auctionInsightsLink);
 
 
-                                        try {
+                                            try {
 
 
-                                            if (numOfDaysBetween > 15) {
-                                                startDate = endDate.minusDays(15);
-                                                numOfDaysBetween = ChronoUnit.DAYS.between(startDate, endDate);
-                                            }
+                                                if (numOfDaysBetween > 15) {
+                                                    startDate = endDate.minusDays(15);
+                                                    numOfDaysBetween = ChronoUnit.DAYS.between(startDate, endDate);
+                                                }
 
-                                            LocalDate finalStartDate = startDate;
-                                            List<LocalDate> localDateList = IntStream.iterate(0, i -> i + 1)
-                                                    .limit(numOfDaysBetween)
-                                                    .mapToObj(i -> finalStartDate.plusDays(i))
-                                                    .collect(Collectors.toList());
+                                                LocalDate finalStartDate = startDate;
+                                                List<LocalDate> localDateList = IntStream.iterate(0, i -> i + 1)
+                                                        .limit(numOfDaysBetween)
+                                                        .mapToObj(i -> finalStartDate.plusDays(i))
+                                                        .collect(Collectors.toList());
 
-                                            for (LocalDate localDate : localDateList) {
-                                                String localDateStr = localDate.format(formatters);
-                                                checkedDateList.add(localDateStr);
-                                            }
+                                                for (LocalDate localDate : localDateList) {
+                                                    String localDateStr = localDate.format(formatters);
+                                                    checkedDateList.add(localDateStr);
+                                                }
 
 //                        System.out.println("CheckedDateList: " + checkedDateList.size());
 
 
-                                            ///
+                                                ///
 
 
-                                            for (String dateSegment : checkedDateList) {
+                                                for (String dateSegment : checkedDateList) {
 
 //                            System.out.println(dateSegment);
 
-                                                String[] dateSegmentSplit = dateSegment.split("/");
+                                                    String[] dateSegmentSplit = dateSegment.split("/");
 
-                                                String formatDateSegmentInDatabase = dateSegmentSplit[2] + "-" + dateSegmentSplit[1] + "-" + dateSegmentSplit[0];
+                                                    String formatDateSegmentInDatabase = dateSegmentSplit[2] + "-" + dateSegmentSplit[1] + "-" + dateSegmentSplit[0];
 
 
-                                                try {
+                                                    try {
 //                                System.out.println("Wait for date picker...");
 
 
-                                                    int datePickerCounter = 0;
-                                                    do {
-                                                        datePickerCounter += 1;
-                                                        try {
-                                                            wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-picker dropdown-button"))).click();
-                                                            break;
-                                                        } catch (Exception waitDatePicker) {
-                                                            wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-picker dropdown-button"))).click();
+                                                        int datePickerCounter = 0;
+                                                        do {
+                                                            datePickerCounter += 1;
+                                                            try {
+                                                                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-picker dropdown-button"))).click();
+                                                                break;
+                                                            } catch (Exception waitDatePicker) {
+                                                                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-picker dropdown-button"))).click();
+                                                            }
                                                         }
-                                                    }
-                                                    while (datePickerCounter == 5);
+                                                        while (datePickerCounter == 5);
 
 
 //                                try {
@@ -1769,84 +1773,84 @@ public class InvoiceService implements IInvoiceService {
 
 
 //                                System.out.println("Finding begin - end date");
-                                                    WebElement beginDateInput = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-range-editor .right-column date-range-input .start.date-input input")));
-                                                    WebElement endDateInput = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-range-editor .right-column date-range-input .end.date-input input")));
+                                                        WebElement beginDateInput = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-range-editor .right-column date-range-input .start.date-input input")));
+                                                        WebElement endDateInput = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-range-editor .right-column date-range-input .end.date-input input")));
 //                                System.out.println("Found begin - end date");
 
 
 //                                beginDateInput.clear();
 
-                                                    beginDateInput.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+                                                        beginDateInput.sendKeys(Keys.chord(Keys.CONTROL, "a"));
 
-                                                    beginDateInput.sendKeys(dateSegment);
+                                                        beginDateInput.sendKeys(dateSegment);
 
 
 //                                endDateInput.clear();
-                                                    endDateInput.sendKeys(Keys.chord(Keys.CONTROL, "a"));
-                                                    endDateInput.sendKeys(dateSegment);
+                                                        endDateInput.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+                                                        endDateInput.sendKeys(dateSegment);
 
 //                                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-range-editor .right-column date-range-input .start.date-input input"))).clear().sendKeys(Keys.chord(Keys.CONTROL, "a"), "4/12/2023");
 //                                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-range-editor .right-column date-range-input .end.date-input input"))).sendKeys(Keys.chord(Keys.CONTROL, "a"),"4/12/2023");
 
 
-                                                    fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".apply-bar material-button.apply"))).click();
+                                                        fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".apply-bar material-button.apply"))).click();
 
 //                                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("menu-item-groups .menu-item-row material-select-item[aria-label='" + dateSegment + "']"))).click();
 //                                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("menu-item-groups .menu-item-row material-select-item[aria-label='Hôm nay']"))).click();
-                                                    superFastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
+                                                        superFastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
 
-                                                    boolean firstDomainPage = true;
-                                                    do {
+                                                        boolean firstDomainPage = true;
+                                                        do {
 
-                                                        if (firstDomainPage) {
-                                                            firstDomainPage = false;
-                                                        } else {
-                                                            // next page
-                                                            driver.findElement(By.cssSelector(".pager-buttons material-button.next")).click();
-                                                            try {
-                                                                fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
-                                                                fastWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
-                                                            } catch (Exception ignore) {
+                                                            if (firstDomainPage) {
+                                                                firstDomainPage = false;
+                                                            } else {
+                                                                // next page
+                                                                driver.findElement(By.cssSelector(".pager-buttons material-button.next")).click();
+                                                                try {
+                                                                    fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
+                                                                    fastWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
+                                                                } catch (Exception ignore) {
 //                                            System.out.println("Not found loading");
-                                                            }
-                                                        }
-
-                                                        List<WebElement> domainRows = driver.findElements(By.cssSelector(".particle-table-row"));
-                                                        for (WebElement domainItem : domainRows) {
-                                                            String domain = domainItem.findElement(By.cssSelector("ess-cell")).getText();
-                                                            if (domain.contains(".")) {
-
-                                                                boolean hasDomainInDb = false;
-
-                                                                // tim thay domain
-
-                                                                String domainText = domainItem.findElement(By.cssSelector("ess-cell")).getText();
-
-
-                                                                // lưu bảng TrackingWeb ở itgreenToolServer
-
-                                                                TrackingWebDTO[] trackingWebDTOList = restTemplate.getForObject(itgreenToolServer + "/api-tracking-web?hostName=" + domainText + "&autoTool=true&date=" + formatDateSegmentInDatabase, TrackingWebDTO[].class);
-                                                                assert trackingWebDTOList != null;
-                                                                if (trackingWebDTOList.length == 0) {
-
-                                                                    TrackingWebDTO trackingWebDTO = new TrackingWebDTO();
-                                                                    trackingWebDTO.setHostName(domainText);
-                                                                    trackingWebDTO.setDate(formatDateSegmentInDatabase);
-                                                                    trackingWebDTO.setAutoTool(true);
-
-                                                                    restTemplate.postForObject(itgreenToolServer + "/api-tracking-web", trackingWebDTO, TrackingWebDTO.class);
                                                                 }
+                                                            }
+
+                                                            List<WebElement> domainRows = driver.findElements(By.cssSelector(".particle-table-row"));
+                                                            for (WebElement domainItem : domainRows) {
+                                                                String domain = domainItem.findElement(By.cssSelector("ess-cell")).getText();
+                                                                if (domain.contains(".")) {
+
+                                                                    boolean hasDomainInDb = false;
+
+                                                                    // tim thay domain
+
+                                                                    String domainText = domainItem.findElement(By.cssSelector("ess-cell")).getText();
 
 
-                                                                PartnerInfoDTO partnerInfoDTO = new PartnerInfoDTO();
-                                                                partnerInfoDTO.setId(domainText);
-                                                                partnerInfoDTO.setNeedToCheck(true);
-                                                                partnerInfoDTO.setSourceType("ads");
+                                                                    // lưu bảng TrackingWeb ở itgreenToolServer
+
+                                                                    TrackingWebDTO[] trackingWebDTOList = restTemplate.getForObject(itgreenToolServer + "/api-tracking-web?hostName=" + domainText + "&autoTool=true&date=" + formatDateSegmentInDatabase, TrackingWebDTO[].class);
+                                                                    assert trackingWebDTOList != null;
+                                                                    if (trackingWebDTOList.length == 0) {
+
+                                                                        TrackingWebDTO trackingWebDTO = new TrackingWebDTO();
+                                                                        trackingWebDTO.setHostName(domainText);
+                                                                        trackingWebDTO.setDate(formatDateSegmentInDatabase);
+                                                                        trackingWebDTO.setAutoTool(true);
+
+                                                                        restTemplate.postForObject(itgreenToolServer + "/api-tracking-web", trackingWebDTO, TrackingWebDTO.class);
+                                                                    }
 
 
-                                                                if (restTemplate.getForObject(searchPartnerInfoServer + "/api-partner-info/" + domainText, PartnerInfoDTO.class) == null) {
+                                                                    PartnerInfoDTO partnerInfoDTO = new PartnerInfoDTO();
+                                                                    partnerInfoDTO.setId(domainText);
+                                                                    partnerInfoDTO.setNeedToCheck(true);
+                                                                    partnerInfoDTO.setSourceType("ads");
+
+
+                                                                    if (restTemplate.getForObject(searchPartnerInfoServer + "/api-partner-info/" + domainText, PartnerInfoDTO.class) == null) {
 //                                        hasDomainInDb = true;
-                                                                    partnerInfoDTO = restTemplate.postForObject(searchPartnerInfoServer + "/api-partner-info", partnerInfoDTO, PartnerInfoDTO.class);
+                                                                        partnerInfoDTO = restTemplate.postForObject(searchPartnerInfoServer + "/api-partner-info", partnerInfoDTO, PartnerInfoDTO.class);
 
 //                                        try {
 //                                            partnerInfoDTO = restTemplate.getForObject(searchPartnerInfoServer + "/api-partner-info/" + domainText, PartnerInfoDTO.class);
@@ -1856,48 +1860,48 @@ public class InvoiceService implements IInvoiceService {
 //                                            partnerInfoDTO = restTemplate.postForObject(searchPartnerInfoServer + "/api-partner-info", partnerInfoDTO, PartnerInfoDTO.class);
 //                                        }
 
-                                                                    assert partnerInfoDTO != null;
+                                                                        assert partnerInfoDTO != null;
 //                                                System.out.println(partnerInfoDTO.getId());
 
 
 //                                        if (!hasDomainInDb){
 //                                            System.out.println("ok");
 //                                        }
+                                                                    }
+
+
                                                                 }
-
-
                                                             }
+
+
                                                         }
+                                                        while (driver.findElements(By.cssSelector(".pager-buttons material-button.next.is-disabled")).size() == 0);
 
-
-                                                    }
-                                                    while (driver.findElements(By.cssSelector(".pager-buttons material-button.next.is-disabled")).size() == 0);
-
-                                                } catch (Exception e3) {
+                                                    } catch (Exception e3) {
 //                                System.out.println("Fail: " + dbAdsAccountDTO.getId() + " - " + dateSegment);
+                                                    }
+
+                                                    AdsAccountDTO adsAccountDTO1 = new AdsAccountDTO();
+                                                    adsAccountDTO1.setId(dbAdsAccountDTO.getId());
+                                                    adsAccountDTO1.setLastCheckDomainDate(formatDateSegmentInDatabase);
+                                                    restTemplate.put(itgreenToolServer + "/api-ads-account", adsAccountDTO1, AdsAccountDTO.class);
+
+
                                                 }
 
-                                                AdsAccountDTO adsAccountDTO1 = new AdsAccountDTO();
-                                                adsAccountDTO1.setId(dbAdsAccountDTO.getId());
-                                                adsAccountDTO1.setLastCheckDomainDate(formatDateSegmentInDatabase);
-                                                restTemplate.put(itgreenToolServer + "/api-ads-account", adsAccountDTO1, AdsAccountDTO.class);
-
-
-                                            }
-
-                                        } catch (Exception ignore) {
+                                            } catch (Exception ignore) {
 //                        System.out.println("Fail: " + dbAdsAccountDTO.getId() + " - " + "Tên miền");
+                                            }
                                         }
+
+
+                                        // ********* END LAY TEN MIEN
+
                                     }
 
 
-                                    // ********* END LAY TEN MIEN
-
-                                }
-
-
-                                if (false) {
-                                    // ********** LAY TU KHOA
+                                    if (false) {
+                                        // ********** LAY TU KHOA
 
 //                if (accountCounter % 10 == 0){
 //                    try {
@@ -1917,92 +1921,92 @@ public class InvoiceService implements IInvoiceService {
 //                    }
 //                }
 
-                                    String keywordSearchLink = accountCellHref.replaceAll("/overview", "/keywords/searchterms");
+                                        String keywordSearchLink = accountCellHref.replaceAll("/overview", "/keywords/searchterms");
 
 
-                                    //
+                                        //
 //                ((JavascriptExecutor) driver).executeScript("window.open()");
 //                tabs = new ArrayList<String>(driver.getWindowHandles());
 //                driver.switchTo().window(tabs.get(1));
-                                    driver.get(keywordSearchLink);
+                                        driver.get(keywordSearchLink);
 
 
-                                    try {
-                                        Thread.sleep(1000);
+                                        try {
+                                            Thread.sleep(1000);
 
-                                        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-picker dropdown-button")));
-                                        for (int dateIndex : new int[]{1, 7}) {
-                                            try {
-                                                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-picker dropdown-button"))).click();
-                                                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("menu-item-groups material-select-item[data-item-index='" + dateIndex + "']"))).click();
-                                                superFastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
+                                            wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-picker dropdown-button")));
+                                            for (int dateIndex : new int[]{1, 7}) {
+                                                try {
+                                                    wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("date-picker dropdown-button"))).click();
+                                                    wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("menu-item-groups material-select-item[data-item-index='" + dateIndex + "']"))).click();
+                                                    superFastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
 
-                                                boolean firstDomainPage = true;
-                                                do {
+                                                    boolean firstDomainPage = true;
+                                                    do {
 
-                                                    if (firstDomainPage) {
-                                                        firstDomainPage = false;
-                                                    } else {
-                                                        // next page
-                                                        driver.findElement(By.cssSelector(".pager-buttons material-button.next")).click();
-                                                        try {
-                                                            fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
-                                                            fastWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
-                                                        } catch (Exception ignore) {
+                                                        if (firstDomainPage) {
+                                                            firstDomainPage = false;
+                                                        } else {
+                                                            // next page
+                                                            driver.findElement(By.cssSelector(".pager-buttons material-button.next")).click();
+                                                            try {
+                                                                fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
+                                                                fastWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
+                                                            } catch (Exception ignore) {
 
-                                                        }
-                                                    }
-
-                                                    List<WebElement> domainRows = driver.findElements(By.cssSelector(".particle-table-row"));
-                                                    boolean updateKeywordList = false;
-                                                    for (WebElement domainItem : domainRows) {
-                                                        String key = domainItem.findElement(By.cssSelector("ess-cell")).getText();
-
-
-                                                        if (!key.equals("") && !keywordList.contains(key)) {
-
-                                                            keywordList.add(key);
-
-                                                            updateKeywordList = true;
-
-
-                                                        }
-                                                    }
-
-                                                    if (updateKeywordList) {
-                                                        String resultKeywordListStr = "";
-                                                        for (String key2 : keywordList) {
-                                                            if (!resultKeywordListStr.equals("")) {
-                                                                resultKeywordListStr += ",";
                                                             }
-                                                            resultKeywordListStr += key2;
                                                         }
 
-                                                        GeneralDTO generalDTO = new GeneralDTO();
-                                                        generalDTO.setId("keyword_list");
-                                                        generalDTO.setValue(resultKeywordListStr);
+                                                        List<WebElement> domainRows = driver.findElements(By.cssSelector(".particle-table-row"));
+                                                        boolean updateKeywordList = false;
+                                                        for (WebElement domainItem : domainRows) {
+                                                            String key = domainItem.findElement(By.cssSelector("ess-cell")).getText();
 
-                                                        restTemplate.put(searchPartnerInfoServer + "/api-general", generalDTO, GeneralDTO.class);
+
+                                                            if (!key.equals("") && !keywordList.contains(key)) {
+
+                                                                keywordList.add(key);
+
+                                                                updateKeywordList = true;
+
+
+                                                            }
+                                                        }
+
+                                                        if (updateKeywordList) {
+                                                            String resultKeywordListStr = "";
+                                                            for (String key2 : keywordList) {
+                                                                if (!resultKeywordListStr.equals("")) {
+                                                                    resultKeywordListStr += ",";
+                                                                }
+                                                                resultKeywordListStr += key2;
+                                                            }
+
+                                                            GeneralDTO generalDTO = new GeneralDTO();
+                                                            generalDTO.setId("keyword_list");
+                                                            generalDTO.setValue(resultKeywordListStr);
+
+                                                            restTemplate.put(searchPartnerInfoServer + "/api-general", generalDTO, GeneralDTO.class);
 //                                            System.out.println("ok");
+                                                        }
+
+
+                                                        break;
+
                                                     }
+                                                    while (driver.findElements(By.cssSelector(".pager-buttons material-button.next.is-disabled")).size() == 0);
 
-
-                                                    break;
-
+                                                } catch (Exception e3) {
+                                                    //
                                                 }
-                                                while (driver.findElements(By.cssSelector(".pager-buttons material-button.next.is-disabled")).size() == 0);
-
-                                            } catch (Exception e3) {
-                                                //
                                             }
+
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
                                         }
 
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
 
-
-                                    /// END LAY TU KHOA
+                                        /// END LAY TU KHOA
 
 
 //                driver.close();
@@ -2016,124 +2020,126 @@ public class InvoiceService implements IInvoiceService {
 //
 //
 //                //End lay ten mien
-                                }
+                                    }
 
 
-                                // Tắt xóa đề xuất
-                                if (false) {
-                                    // XOA DE XUAT
-                                    String recommendationLink = accountCellHref.replaceAll("/overview", "/recommendations");
+                                    // Tắt xóa đề xuất
+                                    if (false) {
+                                        // XOA DE XUAT
+                                        String recommendationLink = accountCellHref.replaceAll("/overview", "/recommendations");
 
 
-                                    //
+                                        //
 //                ((JavascriptExecutor) driver).executeScript("window.open()");
 //                tabs = new ArrayList<String>(driver.getWindowHandles());
 //                driver.switchTo().window(tabs.get(1));
 
-                                    driver.get(recommendationLink);
+                                        driver.get(recommendationLink);
 
 
-                                    try {
-                                        fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".main-cards-view card")));
+                                        try {
+                                            fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".main-cards-view card")));
 
 
-                                        while (true) {
-                                            List<WebElement> cardList = driver.findElements(By.cssSelector(".main-cards-view card suggestion-card-menu"));
+                                            while (true) {
+                                                List<WebElement> cardList = driver.findElements(By.cssSelector(".main-cards-view card suggestion-card-menu"));
 
-                                            if (cardList.size() == 0) {
-                                                break;
-                                            }
+                                                if (cardList.size() == 0) {
+                                                    break;
+                                                }
 
-                                            WebElement suggestionCardMenu = cardList.get(0);
+                                                WebElement suggestionCardMenu = cardList.get(0);
 
-                                            try {
-                                                Thread.sleep(2000);
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
+                                                try {
+                                                    Thread.sleep(2000);
+                                                } catch (InterruptedException e) {
+                                                    e.printStackTrace();
+                                                }
 
 //                WebElement suggestionCardMenu = card.findElement(By.cssSelector("suggestion-card-menu"));
-                                            action.moveToElement(suggestionCardMenu).click().build().perform();
+                                                action.moveToElement(suggestionCardMenu).click().build().perform();
 //            suggestionCardMenu.click();
 
-                                            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("relative-popup")));
+                                                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("relative-popup")));
 
-                                            wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("relative-popup material-list-item:last-of-type"))).click();
+                                                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("relative-popup material-list-item:last-of-type"))).click();
 
-                                            wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".dismiss-all-dialog")));
-
-
-                                            WebElement dismissAllBtn = driver.findElement(By.xpath("//dismiss-all-dialog/material-dialog/focus-trap/div[2]/div/footer/div/material-yes-no-buttons/material-button[2]/material-ripple"));
-                                            dismissAllBtn.click();
+                                                wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".dismiss-all-dialog")));
 
 
-                                            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".dismiss-all-dialog")));
+                                                WebElement dismissAllBtn = driver.findElement(By.xpath("//dismiss-all-dialog/material-dialog/focus-trap/div[2]/div/footer/div/material-yes-no-buttons/material-button[2]/material-ripple"));
+                                                dismissAllBtn.click();
 
 
+                                                wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".dismiss-all-dialog")));
+
+
+                                            }
+
+
+                                        } catch (Exception ignore) {
                                         }
-
-
-                                    } catch (Exception ignore) {
                                     }
+
+
                                 }
 
 
-                            }
+                                // ********* END LAY SO DU
 
 
-                            // ********* END LAY SO DU
+                                // CAP NHAT TAI KHOAN
+
+                                String requestUrl = itgreenToolServer + "/api-ads-account";
 
 
-                            // CAP NHAT TAI KHOAN
-
-                            String requestUrl = itgreenToolServer + "/api-ads-account";
-
-
-                            try {
+                                try {
 
 //                                AdsAccountDTO currentAdsAccountDTO = restTemplate.getForObject(itgreenToolServer + "/api-ads-account/" + adsAccountDTO.getId(), AdsAccountDTO.class);
 
-                                if (
+                                    if (
 //                                        currentAdsAccountDTO != null && isUpdateAccount == true
-                                        isUpdateAccount == true
-                                ) {
-                                    restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+                                            isUpdateAccount == true
+                                    ) {
+                                        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-                                    HttpHeaders headers = new HttpHeaders();
-                                    Map<String, String> param = new HashMap<String, String>();
+                                        HttpHeaders headers = new HttpHeaders();
+                                        Map<String, String> param = new HashMap<String, String>();
 //                param.put("id","10");
-                                    HttpEntity<AdsAccountDTO> requestEntity = new HttpEntity<AdsAccountDTO>(adsAccountDTO, headers);
-                                    HttpEntity<AdsAccountDTO> response = restTemplate.exchange(requestUrl, HttpMethod.PUT, requestEntity, AdsAccountDTO.class, param);
+                                        HttpEntity<AdsAccountDTO> requestEntity = new HttpEntity<AdsAccountDTO>(adsAccountDTO, headers);
+                                        HttpEntity<AdsAccountDTO> response = restTemplate.exchange(requestUrl, HttpMethod.PUT, requestEntity, AdsAccountDTO.class, param);
+                                    }
+                                } catch (Exception ignore) {
+
                                 }
+
+                                // END CAP NHAT TAI KHOAN
+
+
                             } catch (Exception ignore) {
 
                             }
 
-                            // END CAP NHAT TAI KHOAN
+
+                            if (onlyCheckLink == false) {
+                                driver.close();
+                                assert tabs != null;
+                                driver.switchTo().window(tabs.get(0));
+                            }
 
 
-                        } catch (Exception ignore) {
-
-                        }
-
-
-                        if (onlyCheckLink == false) {
-                            driver.close();
-                            assert tabs != null;
-                            driver.switchTo().window(tabs.get(0));
                         }
 
 
                     }
-
-
+                    while (driver.findElements(By.cssSelector(".pager-buttons material-button.next.is-disabled")).size() == 0);
                 }
-                while (driver.findElements(By.cssSelector(".pager-buttons material-button.next.is-disabled")).size() == 0);
-            }
 
 
 //                driver.quit();
+            }
         }
+
 
 
         // Quét link hoạt động, tạm dừng
