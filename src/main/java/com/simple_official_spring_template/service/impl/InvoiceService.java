@@ -1171,34 +1171,49 @@ public class InvoiceService implements IInvoiceService {
 
 
                 boolean filterAccount = true;
-                List<WebElement> predicateEditorList = driver.findElements(By.cssSelector("predicate-editor"));
-                if (predicateEditorList.size() > 0){
-                    for (WebElement predicateEditorElement: predicateEditorList){
-                        System.out.println(predicateEditorElement.findElement(By.cssSelector(".chip-content-container .content")).getText());
 
-                        if (predicateEditorElement.findElement(By.cssSelector(".chip-content-container .content")).getText().contains("Mã khách hàng không chứa")) {
-                            predicateEditorElement.findElement(By.cssSelector(".delete-icon-container")).click();
+                while (true) {
+                    boolean findMaKHFilter = false;
 
-                            try {
+                    List<WebElement> predicateEditorList = driver.findElements(By.cssSelector("predicate-editor"));
+
+                    if (predicateEditorList.size() > 0){
+
+                        for (WebElement predicateEditorElement: predicateEditorList){
+                            System.out.println(predicateEditorElement.findElement(By.cssSelector(".chip-content-container .content")).getText());
+
+                            if (predicateEditorElement.findElement(By.cssSelector(".chip-content-container .content")).getText().contains("Mã khách hàng không chứa")) {
+                                predicateEditorElement.findElement(By.cssSelector(".delete-icon-container")).click();
+
+                                try {
 //                            fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
 //                            fastWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".particle-content-loading")));
-                                Thread.sleep(5000);
-                                try {
-                                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
-                                    hasNewRows = true;
+                                    Thread.sleep(5000);
+                                    try {
+                                        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
+                                        hasNewRows = true;
+                                    } catch (Exception ignore) {
+                                    }
+
                                 } catch (Exception ignore) {
+
                                 }
 
-                            } catch (Exception ignore) {
+                                findMaKHFilter = true;
 
+                                break;
                             }
 
-
-                            break;
                         }
-
                     }
+
+                    if (!findMaKHFilter) {
+                        break;
+                    }
+
+
                 }
+
 
                 // Lưu danh sách tài khoản vào filter
                 if (filterAccount) {
