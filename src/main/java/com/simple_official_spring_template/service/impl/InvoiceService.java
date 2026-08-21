@@ -1201,7 +1201,7 @@ public class InvoiceService implements IInvoiceService {
 
                                 findMaKHFilter = true;
 
-                                break;
+//                                break;
                             }
 
                         }
