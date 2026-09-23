@@ -1034,6 +1034,10 @@ public class InvoiceService implements IInvoiceService {
         String chromeUserdataDir = System.getenv("CHROME_USERDATA_DIR");
         String chromeProfileDirectory = System.getenv("CHROME_PROFILE_DIRECTORY");
 
+
+        System.out.println("chromedriverVariable: " + chromedriverVariable);
+        System.out.println("chromeUserdataDir: " + chromeUserdataDir);
+
 //        WebDriverManager.chromedriver().setup();
 
         System.setProperty("webdriver.chrome.driver",
