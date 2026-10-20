@@ -2306,7 +2306,7 @@ public class InvoiceService implements IInvoiceService {
                         }
 
                         try {
-                            fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("awsm-child-content toolbelt-bar .extended-predicates-container material-button.add-filter-btn"))).click();
+                            fastWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".extended-predicates-container material-button.add-filter-btn"))).click();
                         } catch (Exception ignore) {
                         }
 
