@@ -2301,7 +2301,7 @@ public class InvoiceService implements IInvoiceService {
                             Thread.sleep(3000);
                             fastWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".particle-table-row")));
                         } catch (Exception e) {
-                            e.printStackTrace();
+//                            e.printStackTrace();
                             continue;
                         }
 
